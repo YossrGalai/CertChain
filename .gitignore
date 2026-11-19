@@ -1,0 +1,10 @@
+node_modules/
+artifacts/
+cache/
+coverage/
+typechain-types/
+.env
+*.log
+.DS_Store
+# généré par scripts/deploy.js (adresse locale)
+frontend/contract-config.js

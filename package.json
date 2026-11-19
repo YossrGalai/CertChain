@@ -1,0 +1,16 @@
+{
+  "name": "certchain",
+  "version": "1.0.0",
+  "description": "Certification de diplômes sur Ethereum (Projet Blockchain IGL4)",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "front": "npx http-server frontend -p 3000"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  }
+}
