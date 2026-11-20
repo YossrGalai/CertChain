@@ -2,54 +2,182 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>CertChain - Certification de diplômes</title>
+<title>CertChain · Certification de diplômes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
-  section { border: 1px solid #ccc; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
-  button { padding: .4rem .9rem; margin: .3rem 0; cursor: pointer; }
-  input { padding: .35rem; width: 100%; box-sizing: border-box; margin: .25rem 0; }
-  pre { background: #f5f5f5; padding: .6rem; white-space: pre-wrap; word-break: break-all; }
-  .ok { color: #0a7d2c; } .ko { color: #b00020; }
+:root{--bg:#f4f5fa;--card:#fff;--ink:#14161f;--mut:#667085;--line:#e3e6ee;--brand:#4f46e5;--brand2:#7c3aed;--ok:#0a7d3c;--okbg:#e6f6ec;--ko:#b42318;--kobg:#fdecea;--warn:#b54708;--warnbg:#fff4e5;--gray:#475467;--graybg:#eef0f4}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1017;--card:#171a24;--ink:#e8eaf1;--mut:#9aa3b5;--line:#2a2f3e;--brand:#8b85ff;--brand2:#b794f6;--ok:#4ade80;--okbg:#10291b;--ko:#f87171;--kobg:#2d1517;--warn:#fbbf24;--warnbg:#2c2210;--gray:#cbd5e1;--graybg:#232836}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+code{font:12.5px ui-monospace,Consolas,monospace;word-break:break-all}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 24px;background:linear-gradient(120deg,var(--brand),var(--brand2));color:#fff}
+.brand{font-size:20px;font-weight:700}.brand small{display:block;font-size:12px;font-weight:400;opacity:.85}
+.status{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{padding:4px 10px;border-radius:99px;font-size:12px;background:rgba(255,255,255,.18);color:#fff}
+.chip.ok{background:#16a34a}.chip.warn{background:#d97706}.chip.ko{background:#dc2626}
+.btn{border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--brand);color:#fff}
+.btn:hover{filter:brightness(1.1)}.top .btn{background:#fff;color:var(--brand)}
+.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line)}
+.banner{margin:16px 24px 0;padding:12px 16px;border-radius:10px;font-weight:500}
+.banner.ko{background:var(--kobg);color:var(--ko)}.banner.warn{background:var(--warnbg);color:var(--warn)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;max-width:1180px;margin:20px auto;padding:0 24px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.tabs{display:flex;gap:6px;padding:5px;background:var(--graybg);border-radius:12px;margin-bottom:16px;overflow-x:auto}
+.tab{flex:1;border:0;background:transparent;color:var(--mut);padding:10px 14px;border-radius:9px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--card);color:var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+.card h2{margin:0 0 4px;font-size:18px}.card h3{margin:0 0 8px;font-size:15px}
+.sub{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+.lead{color:var(--mut);margin:0 0 14px}
+.hint{font-size:13px;padding:6px 10px;border-radius:8px;margin-bottom:12px;background:var(--graybg);color:var(--gray)}
+.hint.ok{background:var(--okbg);color:var(--ok)}.hint.warn{background:var(--warnbg);color:var(--warn)}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;cursor:pointer;margin-bottom:12px;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--brand);background:var(--graybg)}
+.drop.has{border-style:solid;border-color:var(--ok)}
+.dz-t{font-weight:600}.dz-s{color:var(--mut);font-size:13px}.dz-h{display:block;margin-top:6px;color:var(--brand)}
+input[type=text],input[type=date]{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;margin-bottom:10px}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.pill{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:3px 11px;font-size:12px;cursor:pointer}
+.pill:hover{border-color:var(--brand)}
+.res{margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--graybg);color:var(--gray)}
+.res.ok{background:var(--okbg);color:var(--ok)}.res.ko{background:var(--kobg);color:var(--ko)}.res.warn{background:var(--warnbg);color:var(--warn)}
+.res small{display:block;opacity:.75;margin-top:2px}
+.big{font-size:22px;font-weight:700}.big+div{margin-bottom:8px}
+.bar{height:8px;border-radius:99px;background:rgba(127,127,127,.25);overflow:hidden;margin:10px 0 4px}
+.bar i{display:block;height:100%;background:currentColor}
+.barl{display:flex;justify-content:space-between;font-size:12px;opacity:.85}
+dl{display:grid;grid-template-columns:110px 1fr;gap:4px 12px;margin:12px 0 0;color:var(--ink);font-size:13px}
+dt{color:var(--mut)}dd{margin:0}
+.link{border:0;background:none;color:var(--brand);cursor:pointer;font:inherit;text-decoration:underline}
+ul.feed{list-style:none;margin:0;padding:0;font-size:12.5px}
+ul.feed li{padding:7px 0;border-bottom:1px solid var(--line)}ul.feed li:last-child{border:0}
+.bn{display:inline-block;min-width:34px;color:var(--mut)}.empty{color:var(--mut)}
+.k-ok{color:var(--ok)}.k-ko{color:var(--ko)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:8px 24px 28px}
 </style>
 </head>
 <body>
-<h1>CertChain</h1>
-<button id="connect">Connecter MetaMask</button> <span id="account"></span>
+<header class="top">
+  <div class="brand">🎓 CertChain<small>Certification de diplômes sur Ethereum</small></div>
+  <div class="status">
+    <span class="chip" id="netChip">Réseau : …</span>
+    <span class="chip" id="roleChip">Non connecté</span>
+    <button class="btn" id="connect">Connecter MetaMask</button>
+  </div>
+</header>
+<div id="banner" class="banner" hidden></div>
 
-<!-- PERSONNE A : page Admin -->
-<section id="admin">
-  <h2>Admin : gérer les émetteurs</h2>
-  <input id="issuerAddr" placeholder="Adresse de l'émetteur (0x...)">
-  <button id="addIssuer">Ajouter</button>
-  <button id="removeIssuer">Retirer</button>
-  <pre id="adminOut"></pre>
+<main class="layout">
+<section>
+  <nav class="tabs">
+    <button class="tab on" data-tab="verify">🔍 Vérifier</button>
+    <button class="tab" data-tab="issue">📜 Émettre</button>
+    <button class="tab" data-tab="life">♻️ Cycle de vie</button>
+    <button class="tab" data-tab="admin">🛡️ Admin</button>
+  </nav>
+
+  <!-- VÉRIFIER : public, sans compte -->
+  <div class="panel" id="tab-verify">
+    <div class="card">
+      <h2>Vérifier un diplôme</h2>
+      <p class="lead">Ouvert à tous, gratuit, sans portefeuille. Le fichier reste dans ton navigateur : seule son empreinte est comparée à la blockchain.</p>
+      <div class="drop" data-id="vf" data-label="Dépose le diplôme à vérifier"></div>
+      <label for="vHash">…ou colle directement une empreinte</label>
+      <input type="text" id="vHash" placeholder="0x… (64 caractères hexadécimaux)">
+      <button class="btn" id="verifyBtn">Vérifier ce document</button>
+      <div id="vOut"></div>
+    </div>
+  </div>
+
+  <!-- ÉMETTRE : émetteurs autorisés -->
+  <div class="panel" id="tab-issue" hidden>
+    <div class="card">
+      <h2>Émettre un certificat</h2>
+      <p class="lead">Seul le hash SHA-256 du diplôme est écrit sur la chaîne, jamais le PDF ni les données de l’étudiant.</p>
+      <div class="hint" data-need="issuer"></div>
+      <div class="drop" data-id="if" data-label="Dépose le diplôme à certifier"></div>
+      <label for="iExp">Date d’expiration</label>
+      <input type="date" id="iExp">
+      <div class="row">Raccourcis :
+        <button class="pill" data-t="iExp" data-y="1">+1 an</button>
+        <button class="pill" data-t="iExp" data-y="5">+5 ans</button>
+        <button class="pill" data-t="iExp" data-y="10">+10 ans</button>
+      </div>
+      <button class="btn" id="issueBtn">Émettre le certificat</button>
+      <div id="iOut"></div>
+    </div>
+  </div>
+
+  <!-- CYCLE DE VIE : révoquer, remplacer, prolonger -->
+  <div class="panel" id="tab-life" hidden>
+    <div class="card">
+      <h2>Cycle de vie d’un certificat</h2>
+      <p class="lead">Réservé à l’émetteur d’origine du document concerné.</p>
+      <div class="hint" data-need="issuer"></div>
+      <div class="drop" data-id="lf" data-label="Document concerné"></div>
+
+      <h3>⛔ Révoquer</h3>
+      <input type="text" id="revReason" placeholder="Motif (obligatoire)">
+      <button class="btn" id="revokeBtn">Révoquer</button>
+      <div id="revOut"></div>
+
+      <div class="sub">
+        <h3>🔁 Révoquer et remplacer par une version corrigée</h3>
+        <div class="drop" data-id="lf2" data-label="Nouveau document (version corrigée)"></div>
+        <label for="repExp">Expiration du nouveau certificat</label>
+        <input type="date" id="repExp">
+        <input type="text" id="repReason" placeholder="Motif du remplacement (obligatoire)">
+        <button class="btn" id="replaceBtn">Révoquer et remplacer</button>
+        <div id="repOut"></div>
+      </div>
+
+      <div class="sub">
+        <h3>⏳ Prolonger la validité</h3>
+        <label for="extDate">Nouvelle date d’expiration (jamais plus courte)</label>
+        <input type="date" id="extDate">
+        <button class="btn" id="extendBtn">Prolonger</button>
+        <div id="extOut"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="panel" id="tab-admin" hidden>
+    <div class="card">
+      <h2>Gestion des émetteurs</h2>
+      <p class="lead">L’université (admin) décide quels départements peuvent émettre. Elle n’émet pas elle-même.</p>
+      <div class="hint" data-need="admin"></div>
+      <label for="issuerAddr">Adresse de l’émetteur</label>
+      <input type="text" id="issuerAddr" placeholder="0x… (adresse complète)">
+      <div class="row">Comptes de test Hardhat (publics) :
+        <button class="pill" data-addr="0x70997970C51812dc3A010C7d01b50e0d17dc79C8">#1</button>
+        <button class="pill" data-addr="0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC">#2</button>
+        <button class="pill" data-addr="0x90F79bf6EB2c4f870365E785982E1f101E93b906">#3</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="addIssuer">Ajouter</button>
+        <button class="btn ghost" id="removeIssuer">Retirer</button>
+        <button class="btn ghost" id="checkIssuer">Est-ce un émetteur ?</button>
+      </div>
+      <div id="aOut"></div>
+    </div>
+  </div>
 </section>
 
-<!-- PERSONNE B : page Émission -->
-<section id="issue">
-  <h2>Émission d'un certificat</h2>
-  <input type="file" id="issueFile">
-  <label>Date d'expiration <input type="date" id="expDate"></label>
-  <button id="issueBtn">Émettre</button>
-  <pre id="issueOut"></pre>
-</section>
-
-<!-- PERSONNE C : page Vérification / Révocation -->
-<section id="verify">
-  <h2>Vérification publique</h2>
-  <input type="file" id="verifyFile">
-  <button id="verifyBtn">Vérifier</button>
-  <pre id="verifyOut"></pre>
-  <h3>Révocation (émetteur d'origine)</h3>
-  <input id="reason" placeholder="Motif">
-  <button id="revokeBtn">Révoquer le fichier sélectionné</button>
-  <pre id="revokeOut"></pre>
-</section>
+<aside>
+  <div class="card"><h3>⛓️ Événements on-chain</h3><ul class="feed" id="events"><li class="empty">Chargement…</li></ul></div>
+  <div class="card"><h3>🧾 Journal de la session</h3><ul class="feed" id="log"><li class="empty">Aucune opération.</li></ul></div>
+</aside>
+</main>
+<footer>Réseau local de test · aucun fonds réel · seule l’empreinte du document est enregistrée on-chain</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
 <script src="contract-config.js"></script>
 <script>
+const ADDR = window.CONTRACT_ADDRESS;
+const RPC = "http://127.0.0.1:8545";
+const CHAIN = 31337n;
 const ABI = [
   "function admin() view returns (address)",
   "function issuers(address) view returns (bool)",
@@ -57,55 +185,256 @@ const ABI = [
   "function removeIssuer(address a)",
   "function issueCertificate(bytes32 hash, uint64 expiresAt)",
   "function revokeCertificate(bytes32 hash, string reason)",
-  "function verifyCertificate(bytes32 hash) view returns (uint8 status, address issuer, uint64 issuedAt, uint64 expiresAt, string reason)",
+  "function revokeAndReplace(bytes32 oldHash, bytes32 newHash, uint64 newExpiresAt, string reason)",
+  "function extendExpiration(bytes32 hash, uint64 newExpiresAt)",
+  "function verifyCertificate(bytes32 hash) view returns (uint8 status, address issuer, uint64 issuedAt, uint64 expiresAt, string reason, bytes32 replacedBy)",
+  "event IssuerAdded(address indexed issuer)",
+  "event IssuerRemoved(address indexed issuer)",
+  "event CertificateIssued(bytes32 indexed hash, address indexed issuer, uint64 expiresAt)",
+  "event CertificateRevoked(bytes32 indexed hash, address indexed issuer, string reason)",
+  "event CertificateReplaced(bytes32 indexed oldHash, bytes32 indexed newHash, address indexed issuer)",
+  "event CertificateExtended(bytes32 indexed hash, address indexed issuer, uint64 oldExpiresAt, uint64 newExpiresAt)"
 ];
-const STATUS = ["Inconnu", "Valide", "Révoqué", "Expiré"];
-let signer, contract;
-const $ = (id) => document.getElementById(id);
+const FR = {
+  "Not admin": "Réservé à l’admin (université).",
+  "Not an authorized issuer": "Ce compte n’est pas un émetteur autorisé.",
+  "Already issuer": "Cette adresse est déjà émetteur.",
+  "Not an issuer": "Cette adresse n’est pas émetteur.",
+  "Zero address": "Adresse nulle refusée.",
+  "Empty hash": "Empreinte vide refusée.",
+  "Already registered": "Ce document est déjà enregistré (doublon).",
+  "Expiration must be in the future": "La date d’expiration doit être dans le futur.",
+  "Unknown certificate": "Aucun certificat enregistré pour ce document.",
+  "Only original issuer": "Seul l’émetteur d’origine peut faire cette action.",
+  "Already revoked": "Ce certificat est déjà révoqué.",
+  "Reason required": "Un motif est obligatoire.",
+  "Must extend, not shorten": "On peut prolonger, jamais raccourcir."
+};
+const ST = [
+  ["Inconnu", "gray", "❔", "Aucun certificat enregistré pour ce document."],
+  ["Valide", "ok", "✅", "Document authentique, non révoqué, dans sa période de validité."],
+  ["Révoqué", "ko", "⛔", "Ce certificat a été révoqué par son émetteur."],
+  ["Expiré", "warn", "⌛", "La période de validité est dépassée."]
+];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const short = (s, a = 6, b = 4) => s.slice(0, a) + "…" + s.slice(-b);
+const fmt = ts => new Date(Number(ts) * 1000).toLocaleDateString("fr-FR", {day: "numeric", month: "long", year: "numeric"});
+const toTs = v => { if (!v) throw new Error("Choisis une date d’expiration."); return Math.floor(new Date(v + "T23:59:59").getTime() / 1000); };
 
-async function sha256File(file) {
-  const buf = await file.arrayBuffer();
-  const digest = await crypto.subtle.digest("SHA-256", buf);
-  return "0x" + [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, "0")).join("");
+const readProvider = new ethers.JsonRpcProvider(RPC);
+const iface = new ethers.Interface(ABI);
+const files = {};
+let provider = null, account = null, role = "none", reader = null, writer = null;
+
+/* ---------- Interface : onglets, dépôt de fichiers, raccourcis ---------- */
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".panel").forEach(p => p.hidden = p.id !== "tab-" + b.dataset.tab);
+});
+document.querySelectorAll("[data-y]").forEach(b => b.onclick = () => {
+  const d = new Date(); d.setFullYear(d.getFullYear() + Number(b.dataset.y));
+  $(b.dataset.t).value = d.toISOString().slice(0, 10);
+});
+document.querySelectorAll("[data-addr]").forEach(b => b.onclick = () => $("issuerAddr").value = b.dataset.addr);
+
+async function sha256(file) {
+  const d = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  return "0x" + [...new Uint8Array(d)].map(x => x.toString(16).padStart(2, "0")).join("");
 }
-function show(id, msg, ok = true) { $(id).textContent = msg; $(id).className = ok ? "ok" : "ko"; }
-function errMsg(e) { return e.reason || e.shortMessage || e.message; }
+function mountDrop(el) {
+  const id = el.dataset.id;
+  el.innerHTML = `<input type="file" hidden><div class="dz-t">${el.dataset.label}</div><div class="dz-s">Glisse un fichier ici ou clique pour choisir</div><code class="dz-h"></code>`;
+  const inp = el.querySelector("input");
+  const take = async f => {
+    if (!f) return;
+    const h = await sha256(f);
+    files[id] = {name: f.name, hash: h};
+    el.classList.add("has");
+    el.querySelector(".dz-s").textContent = `📄 ${f.name} · ${(f.size / 1024).toFixed(1)} Ko`;
+    el.querySelector(".dz-h").textContent = "SHA-256 : " + h;
+  };
+  inp.onclick = e => e.stopPropagation();
+  el.onclick = () => inp.click();
+  inp.onchange = () => take(inp.files[0]);
+  el.ondragover = e => { e.preventDefault(); el.classList.add("over"); };
+  el.ondragleave = () => el.classList.remove("over");
+  el.ondrop = e => { e.preventDefault(); el.classList.remove("over"); take(e.dataTransfer.files[0]); };
+}
+document.querySelectorAll(".drop").forEach(mountDrop);
+const need = id => { if (!files[id]) throw new Error("Choisis d’abord un fichier."); return files[id].hash; };
 
-$("connect").onclick = async () => {
-  if (!window.ethereum) return alert("MetaMask non détecté");
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = await provider.getSigner();
-  contract = new ethers.Contract(window.CONTRACT_ADDRESS, ABI, signer);
-  $("account").textContent = await signer.getAddress();
+/* ---------- Messages, journal, bannière ---------- */
+function banner(msg, kind) { const b = $("banner"); b.hidden = !msg; b.className = "banner " + (kind || "ko"); b.textContent = msg || ""; }
+function journal(kind, text) {
+  const ul = $("log"); if (ul.querySelector(".empty")) ul.innerHTML = "";
+  const li = document.createElement("li");
+  li.innerHTML = `<span class="bn">${new Date().toLocaleTimeString("fr-FR")}</span> <span class="k-${kind}">${kind === "ok" ? "✔" : "✖"}</span> ${esc(text)}`;
+  ul.prepend(li);
+  while (ul.children.length > 30) ul.lastChild.remove();
+}
+function note(el, kind, title, detail, raw) {
+  el.innerHTML = `<div class="res ${kind}"><b>${esc(title)}</b><div>${esc(detail || "")}</div>${raw && raw !== detail ? `<small>${esc(raw)}</small>` : ""}</div>`;
+  if (kind === "ok" || kind === "ko") journal(kind, title + (kind === "ko" ? " : " + detail : ""));
+}
+const reason = e => (e.code === "ACTION_REJECTED" || e.code === 4001) ? "Transaction annulée dans MetaMask." : (e.reason || e.shortMessage || e.message);
+
+/* ---------- Connexion, réseau, rôle ---------- */
+function netChip(id) {
+  const c = $("netChip");
+  c.textContent = id === CHAIN ? `Hardhat · ${id}` : `Réseau ${id} ≠ 31337`;
+  c.className = "chip " + (id === CHAIN ? "ok" : "ko");
+}
+async function refreshRole() {
+  if (!account) role = "none";
+  else {
+    const [adm, iss] = await Promise.all([reader.admin(), reader.issuers(account)]);
+    role = account.toLowerCase() === adm.toLowerCase() ? "admin" : iss ? "issuer" : "visitor";
+  }
+  const L = {none: "Non connecté", admin: "Admin", issuer: "Émetteur", visitor: "Visiteur"};
+  $("roleChip").textContent = L[role] + (account ? " · " + short(account) : "");
+  $("roleChip").className = "chip " + ({admin: "ok", issuer: "ok", visitor: "warn", none: ""}[role]);
+  document.querySelectorAll(".hint").forEach(h => {
+    const ok = role === h.dataset.need;
+    h.className = "hint " + (role === "none" ? "" : ok ? "ok" : "warn");
+    h.textContent = role === "none" ? "Connecte MetaMask pour agir."
+      : ok ? "✓ Ton compte a le rôle requis."
+      : `⚠ Rôle requis : ${h.dataset.need === "admin" ? "Admin" : "Émetteur"}. Ton compte est « ${L[role]} » : l’action sera rejetée (utile pour la démo du scénario refusé).`;
+  });
+}
+async function connect(silent) {
+  if (!window.ethereum) { banner("MetaMask n’est pas détecté dans ce navigateur.", "warn"); return; }
+  provider = new ethers.BrowserProvider(window.ethereum);
+  if (!silent) await provider.send("eth_requestAccounts", []);
+  const accts = await provider.send("eth_accounts", []);
+  if (!accts.length) { account = null; writer = null; await refreshRole(); return; }
+  const signer = await provider.getSigner();
+  account = await signer.getAddress();
+  writer = new ethers.Contract(ADDR, ABI, signer);
+  reader = writer;
+  netChip((await provider.getNetwork()).chainId);
+  await refreshRole();
+  loadEvents().catch(() => {});
+}
+$("connect").onclick = () => connect(false).catch(e => banner(reason(e), "ko"));
+
+/* ---------- Événements on-chain ---------- */
+function fmtEv(ev) {
+  const a = ev.args;
+  switch (ev.name) {
+    case "IssuerAdded": return `<b>Émetteur ajouté</b> ${short(a.issuer)}`;
+    case "IssuerRemoved": return `<b>Émetteur retiré</b> ${short(a.issuer)}`;
+    case "CertificateIssued": return `<b>Certificat émis</b> ${short(a.hash, 8, 4)} · exp. ${fmt(a.expiresAt)}`;
+    case "CertificateRevoked": return `<b>Révoqué</b> ${short(a.hash, 8, 4)} · ${esc(a.reason)}`;
+    case "CertificateReplaced": return `<b>Remplacé</b> ${short(a.oldHash, 8, 4)} → ${short(a.newHash, 8, 4)}`;
+    case "CertificateExtended": return `<b>Prolongé</b> ${short(a.hash, 8, 4)} → ${fmt(a.newExpiresAt)}`;
+    default: return esc(ev.name);
+  }
+}
+async function loadEvents() {
+  const logs = await (provider || readProvider).getLogs({address: ADDR, fromBlock: 0, toBlock: "latest"});
+  const rows = logs.map(l => { let ev = null; try { ev = iface.parseLog(l); } catch (_) {} return ev && {ev, bn: l.blockNumber}; })
+    .filter(Boolean).reverse().slice(0, 14);
+  $("events").innerHTML = rows.length
+    ? rows.map(r => `<li><span class="bn">#${r.bn}</span> ${fmtEv(r.ev)}</li>`).join("")
+    : `<li class="empty">Aucun événement pour l’instant.</li>`;
+}
+
+/* ---------- Vérification (lecture seule, sans compte) ---------- */
+function verifyHash() {
+  if (files.vf) return files.vf.hash;
+  const t = $("vHash").value.trim();
+  if (/^0x[0-9a-fA-F]{64}$/.test(t)) return t;
+  throw new Error("Choisis un fichier ou colle une empreinte valide (0x + 64 caractères).");
+}
+async function verify(hash) {
+  const out = $("vOut");
+  out.innerHTML = `<div class="res">Interrogation de la blockchain…</div>`;
+  try {
+    const r = await reader.verifyCertificate(hash);
+    const s = Number(r.status), [name, k, ico, desc] = ST[s];
+    let body = `<dl><dt>Empreinte</dt><dd><code>${esc(hash)}</code></dd>`;
+    let bar = "";
+    if (s !== 0) {
+      const iss = Number(r.issuedAt), exp = Number(r.expiresAt), now = Date.now() / 1000;
+      const pct = Math.max(0, Math.min(100, (now - iss) / (exp - iss) * 100));
+      const left = Math.ceil((exp - now) / 86400);
+      bar = `<div class="bar"><i style="width:${pct}%"></i></div><div class="barl"><span>Émis le ${fmt(iss)}</span><span>${left > 0 ? "expire dans " + left + " j" : "expiré"} · ${fmt(exp)}</span></div>`;
+      body += `<dt>Émetteur</dt><dd><code title="${esc(r.issuer)}">${short(r.issuer, 8, 6)}</code></dd>`;
+      if (r.reason) body += `<dt>Motif</dt><dd>${esc(r.reason)}</dd>`;
+      if (r.replacedBy !== ethers.ZeroHash)
+        body += `<dt>Remplacé par</dt><dd><code>${short(r.replacedBy, 10, 8)}</code> <button class="link" data-hash="${r.replacedBy}">vérifier ce remplaçant</button></dd>`;
+    }
+    out.innerHTML = `<div class="res ${k}"><div class="big">${ico} ${name}</div><div>${desc}</div>${bar}${body}</dl></div>`;
+  } catch (e) { note(out, "ko", "Lecture impossible", reason(e)); }
+}
+$("vOut").onclick = e => { const b = e.target.closest("[data-hash]"); if (b) verify(b.dataset.hash); };
+$("verifyBtn").onclick = () => { try { verify(verifyHash()); } catch (e) { note($("vOut"), "ko", "Champ manquant", e.message); } };
+
+/* ---------- Transactions ---------- */
+async function send(el, label, fn) {
+  try {
+    if (!writer) throw new Error("Connecte MetaMask d’abord.");
+    note(el, "info", label, "Confirme dans MetaMask, puis attends le minage…");
+    const rc = await (await fn(writer)).wait();
+    note(el, "ok", label + " : réussi", `Transaction minée au bloc ${rc.blockNumber} · ${short(rc.hash, 10, 8)}`);
+    refreshRole().catch(() => {}); loadEvents().catch(() => {});
+  } catch (e) {
+    const raw = reason(e);
+    note(el, "ko", label + " : REJETÉ", FR[raw] || raw, raw);
+  }
+}
+const guard = (el, fn) => async () => { let args; try { args = fn(); } catch (e) { return note(el, "ko", "Champ manquant", e.message); } await args(); };
+
+$("issueBtn").onclick = guard($("iOut"), () => {
+  const h = need("if"), t = toTs($("iExp").value);
+  return () => send($("iOut"), "Émission", c => c.issueCertificate(h, t));
+});
+$("revokeBtn").onclick = guard($("revOut"), () => {
+  const h = need("lf"), r = $("revReason").value.trim();
+  return () => send($("revOut"), "Révocation", c => c.revokeCertificate(h, r));
+});
+$("replaceBtn").onclick = guard($("repOut"), () => {
+  const o = need("lf"), n = need("lf2"), t = toTs($("repExp").value), r = $("repReason").value.trim();
+  return () => send($("repOut"), "Remplacement", c => c.revokeAndReplace(o, n, t, r));
+});
+$("extendBtn").onclick = guard($("extOut"), () => {
+  const h = need("lf"), t = toTs($("extDate").value);
+  return () => send($("extOut"), "Prolongation", c => c.extendExpiration(h, t));
+});
+
+function issuerAddr() {
+  const v = $("issuerAddr").value.trim();
+  if (!ethers.isAddress(v)) throw new Error("Adresse invalide : colle l’adresse complète (0x + 40 caractères).");
+  return v;
+}
+$("addIssuer").onclick = guard($("aOut"), () => { const a = issuerAddr(); return () => send($("aOut"), "Ajout d’émetteur", c => c.addIssuer(a)); });
+$("removeIssuer").onclick = guard($("aOut"), () => { const a = issuerAddr(); return () => send($("aOut"), "Retrait d’émetteur", c => c.removeIssuer(a)); });
+$("checkIssuer").onclick = async () => {
+  const el = $("aOut");
+  try {
+    const a = issuerAddr();
+    const yes = await reader.issuers(a);
+    note(el, yes ? "ok" : "warn", yes ? "Émetteur autorisé" : "Pas un émetteur", short(a, 10, 8));
+  } catch (e) { note(el, "ko", "Vérification impossible", reason(e)); }
 };
 
-async function run(outId, fn) {
-  try { show(outId, "Transaction en cours..."); show(outId, await fn(), true); }
-  catch (e) { show(outId, "REJETÉ : " + errMsg(e), false); }
-}
-
-$("addIssuer").onclick = () => run("adminOut", async () => {
-  const tx = await contract.addIssuer($("issuerAddr").value); await tx.wait(); return "Émetteur ajouté";
-});
-$("removeIssuer").onclick = () => run("adminOut", async () => {
-  const tx = await contract.removeIssuer($("issuerAddr").value); await tx.wait(); return "Émetteur retiré";
-});
-$("issueBtn").onclick = () => run("issueOut", async () => {
-  const hash = await sha256File($("issueFile").files[0]);
-  const exp = Math.floor(new Date($("expDate").value).getTime() / 1000);
-  const tx = await contract.issueCertificate(hash, exp); await tx.wait();
-  return "Certificat émis\nHash : " + hash;
-});
-$("verifyBtn").onclick = () => run("verifyOut", async () => {
-  const hash = await sha256File($("verifyFile").files[0]);
-  const r = await contract.verifyCertificate(hash);
-  return `Résultat : ${STATUS[Number(r.status)]}\nHash : ${hash}\nÉmetteur : ${r.issuer}\nExpire : ${r.expiresAt ? new Date(Number(r.expiresAt) * 1000).toLocaleDateString() : "-"}\nMotif : ${r.reason || "-"}`;
-});
-$("revokeBtn").onclick = () => run("revokeOut", async () => {
-  const hash = await sha256File($("verifyFile").files[0]);
-  const tx = await contract.revokeCertificate(hash, $("reason").value); await tx.wait(); return "Certificat révoqué";
-});
+/* ---------- Démarrage ---------- */
+(async function init() {
+  if (!ADDR) { banner("Adresse du contrat absente : lance « npm run deploy:local », puis recharge la page (Ctrl+Maj+R).", "ko"); return; }
+  reader = new ethers.Contract(ADDR, ABI, readProvider);
+  try {
+    netChip((await readProvider.getNetwork()).chainId);
+    if ((await readProvider.getCode(ADDR)) === "0x")
+      banner("Aucun contrat à cette adresse sur ce nœud. Relance le déploiement (npm run deploy:local), efface l’activité MetaMask, puis recharge.", "ko");
+    else await loadEvents();
+  } catch (e) { banner("Nœud local injoignable sur " + RPC + " : lance « npx hardhat node ».", "ko"); }
+  if (window.ethereum) {
+    window.ethereum.on("accountsChanged", () => connect(true).catch(() => {}));
+    window.ethereum.on("chainChanged", () => location.reload());
+    connect(true).catch(() => {});
+  }
+})();
 </script>
 </body>
 </html>
