@@ -17,6 +17,7 @@ code{font:12.5px ui-monospace,Consolas,monospace;word-break:break-all}
 .chip.ok{background:#16a34a}.chip.warn{background:#d97706}.chip.ko{background:#dc2626}
 .btn{border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--brand);color:#fff}
 .btn:hover{filter:brightness(1.1)}.top .btn{background:#fff;color:var(--brand)}
+.top .btn.out{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.7)}
 .btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line)}
 .banner{margin:16px 24px 0;padding:12px 16px;border-radius:10px;font-weight:500}
 .banner.ko{background:var(--kobg);color:var(--ko)}.banner.warn{background:var(--warnbg);color:var(--warn)}
@@ -64,6 +65,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:8px 24px 28px}
     <span class="chip" id="netChip">Réseau : …</span>
     <span class="chip" id="roleChip">Non connecté</span>
     <button class="btn" id="connect">Connecter MetaMask</button>
+    <button class="btn" id="switchAcc" hidden>Changer de compte</button>
+    <button class="btn out" id="disconnect" hidden>Déconnecter</button>
   </div>
 </header>
 <div id="banner" class="banner" hidden></div>
@@ -304,19 +307,55 @@ async function refreshRole() {
 }
 async function connect(silent) {
   if (!window.ethereum) { banner("MetaMask n’est pas détecté dans ce navigateur.", "warn"); return; }
+  if (silent && offFlag()) return;
+  if (!silent) offFlag(false);
   provider = new ethers.BrowserProvider(window.ethereum);
   if (!silent) await provider.send("eth_requestAccounts", []);
   const accts = await provider.send("eth_accounts", []);
-  if (!accts.length) { account = null; writer = null; await refreshRole(); return; }
+  if (!accts.length) { resetWallet(); await refreshRole(); return; }
   const signer = await provider.getSigner();
   account = await signer.getAddress();
   writer = new ethers.Contract(ADDR, ABI, signer);
   reader = writer;
   netChip((await provider.getNetwork()).chainId);
   await refreshRole();
+  setButtons();
   loadEvents().catch(() => {});
 }
+// État « déconnecté » mémorisé pour la session (évite la reconnexion automatique)
+const OFF = "cc_disconnected";
+function offFlag(v) {
+  try { if (v === undefined) return sessionStorage.getItem(OFF); if (v) sessionStorage.setItem(OFF, "1"); else sessionStorage.removeItem(OFF); } catch (_) {}
+  return null;
+}
+function setButtons() {
+  const on = !!account;
+  $("connect").hidden = on; $("switchAcc").hidden = !on; $("disconnect").hidden = !on;
+}
+function resetWallet() {
+  account = null; writer = null; provider = null;
+  reader = new ethers.Contract(ADDR, ABI, readProvider);
+  setButtons();
+}
+async function switchAccount() {
+  try {
+    // Ouvre la fenêtre MetaMask pour choisir le(s) compte(s) autorisé(s) pour ce site
+    await window.ethereum.request({method: "wallet_requestPermissions", params: [{eth_accounts: {}}]});
+    offFlag(false);
+    await connect(true);
+  } catch (e) { if (e.code !== 4001) banner(reason(e), "ko"); }
+}
+async function disconnect() {
+  // Retire l’autorisation du site dans MetaMask (si supporté), puis réinitialise la page
+  try { await window.ethereum.request({method: "wallet_revokePermissions", params: [{eth_accounts: {}}]}); } catch (_) {}
+  offFlag(true);
+  resetWallet();
+  await refreshRole();
+  journal("ok", "Déconnecté du site");
+}
 $("connect").onclick = () => connect(false).catch(e => banner(reason(e), "ko"));
+$("switchAcc").onclick = switchAccount;
+$("disconnect").onclick = disconnect;
 
 /* ---------- Événements on-chain ---------- */
 function fmtEv(ev) {
