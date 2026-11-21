@@ -58,10 +58,20 @@ contract CertificateRegistry {
     }
 
     // ===================== MODULE B : émission =====================
-    function issueCertificate(bytes32 hash, uint64 expiresAt) external onlyIssuer {
+    uint64 public constant MAX_VALIDITY = 20 * 365 days; // validité maximale (20 ans)
+    uint256 public constant MAX_BATCH = 50;              // taille maximale d'un lot
+
+    /// Règle d'expiration unique (réutilisable par les autres modules).
+    function _checkExpiration(uint64 expiresAt) internal view {
+        require(expiresAt > block.timestamp, "Expiration must be in the future");
+        require(expiresAt <= block.timestamp + MAX_VALIDITY, "Expiration too far");
+    }
+
+    /// Toutes les règles d'émission, écrites une seule fois.
+    function _register(bytes32 hash, uint64 expiresAt) internal {
         require(hash != bytes32(0), "Empty hash");
         require(certs[hash].issuedAt == 0, "Already registered");
-        require(expiresAt > block.timestamp, "Expiration must be in the future");
+        _checkExpiration(expiresAt);
 
         certs[hash] = Certificate({
             issuer: msg.sender,
@@ -72,6 +82,20 @@ contract CertificateRegistry {
             replacedBy: bytes32(0)
         });
         emit CertificateIssued(hash, msg.sender, expiresAt);
+    }
+
+    function issueCertificate(bytes32 hash, uint64 expiresAt) external onlyIssuer {
+        _register(hash, expiresAt);
+    }
+
+    /// Émission par lot (une promotion) : une transaction, une expiration commune.
+    /// Atomique : un seul hash refusé annule tout le lot.
+    function issueCertificates(bytes32[] calldata hashes, uint64 expiresAt) external onlyIssuer {
+        require(hashes.length > 0, "Empty batch");
+        require(hashes.length <= MAX_BATCH, "Batch too large");
+        for (uint256 i = 0; i < hashes.length; i++) {
+            _register(hashes[i], expiresAt);
+        }
     }
 
     // ===================== MODULE C : vérification, révocation, remplacement, prolongation =====================
