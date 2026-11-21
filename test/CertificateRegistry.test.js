@@ -28,6 +28,46 @@ describe("CertificateRegistry", () => {
       await reg.addIssuer(issuer.address);
       await expect(reg.removeIssuer(issuer.address)).to.emit(reg, "IssuerRemoved");
     });
+    it("REJETÉ : l'admin ne peut pas ajouter l'adresse zéro", async () => {
+  const { reg } = await loadFixture(deployFixture);
+
+  await expect(
+    reg.addIssuer(ethers.ZeroAddress)
+  ).to.be.revertedWith("Zero address");
+});
+
+it("REJETÉ : l'admin ne peut pas ajouter deux fois le même émetteur", async () => {
+  const { reg, issuer } = await loadFixture(deployFixture);
+
+  await reg.addIssuer(issuer.address);
+
+  await expect(
+    reg.addIssuer(issuer.address)
+  ).to.be.revertedWith("Already issuer");
+});
+
+it("REJETÉ : un non-admin ne peut pas retirer un émetteur", async () => {
+  const { reg, issuer } = await loadFixture(deployFixture);
+
+  await reg.addIssuer(issuer.address);
+
+  await expect(
+    reg.connect(issuer).removeIssuer(issuer.address)
+  ).to.be.revertedWith("Not admin");
+});
+
+it("REJETÉ : un émetteur retiré ne peut plus émettre de certificat", async () => {
+  const { reg, issuer, future } = await loadFixture(deployFixture);
+
+  await reg.addIssuer(issuer.address);
+  await reg.removeIssuer(issuer.address);
+
+  const hash = ethers.id("removed-issuer-certificate");
+
+  await expect(
+    reg.connect(issuer).issueCertificate(hash, future)
+  ).to.be.revertedWith("Not an authorized issuer");
+});
   });
 
   describe("Module B - émission", () => {
