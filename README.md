@@ -2,7 +2,7 @@
 
 Projet Blockchain IGL4 (2026) - DApp : smart contract Solidity `CertificateRegistry` + interface web (HTML, ethers.js, MetaMask).
 
-**Équipe** : _Nom 1 (rôles & accès)_, _Nom 2 (émission)_, _Nom 3 (vérification & révocation)_
+**Équipe** : Maha Tlili (rôles & accès)_, Emna Kallel (émission)_, Yossr Galai (vérification & révocation)_
 
 ## Principe
 Seul le **hash SHA-256** du diplôme est enregistré on-chain (jamais le PDF, jamais de donnée personnelle). Un employeur dépose le fichier : le navigateur recalcule le hash et interroge le contrat -> **valide / révoqué / expiré / inconnu**.
