@@ -106,6 +106,19 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:8px 24px 28px}
       </div>
       <button class="btn" id="issueBtn">Émettre le certificat</button>
       <div id="iOut"></div>
+            <div class="sub">
+        <h3>📦 Émission par lot (une promotion)</h3>
+        <p class="lead">Plusieurs diplômes, une seule transaction et une expiration commune (50 maximum).</p>
+        <input type="file" id="bFiles" multiple>
+        <div id="bList" class="hint" style="margin-top:10px">Aucun fichier.</div>
+        <label for="bExp">Date d’expiration commune</label>
+        <input type="date" id="bExp">
+        <div class="row">Raccourcis :
+          <button class="pill" data-t="bExp" data-y="5">+5 ans</button>
+        </div>
+        <button class="btn" id="batchBtn">Émettre le lot</button>
+        <div id="bOut"></div>
+      </div>
     </div>
   </div>
 
@@ -184,6 +197,7 @@ const ABI = [
   "function addIssuer(address a)",
   "function removeIssuer(address a)",
   "function issueCertificate(bytes32 hash, uint64 expiresAt)",
+  "function issueCertificates(bytes32[] hashes, uint64 expiresAt)",
   "function revokeCertificate(bytes32 hash, string reason)",
   "function revokeAndReplace(bytes32 oldHash, bytes32 newHash, uint64 newExpiresAt, string reason)",
   "function extendExpiration(bytes32 hash, uint64 newExpiresAt)",
@@ -208,7 +222,10 @@ const FR = {
   "Only original issuer": "Seul l’émetteur d’origine peut faire cette action.",
   "Already revoked": "Ce certificat est déjà révoqué.",
   "Reason required": "Un motif est obligatoire.",
-  "Must extend, not shorten": "On peut prolonger, jamais raccourcir."
+  "Must extend, not shorten": "On peut prolonger, jamais raccourcir.",
+  "Expiration too far": "Expiration trop lointaine (maximum 20 ans).",
+  "Empty batch": "Aucun certificat dans le lot.",
+  "Batch too large": "Lot trop grand (maximum 50 certificats)."
 };
 const ST = [
   ["Inconnu", "gray", "❔", "Aucun certificat enregistré pour ce document."],
@@ -389,6 +406,19 @@ const guard = (el, fn) => async () => { let args; try { args = fn(); } catch (e)
 $("issueBtn").onclick = guard($("iOut"), () => {
   const h = need("if"), t = toTs($("iExp").value);
   return () => send($("iOut"), "Émission", c => c.issueCertificate(h, t));
+});
+let batch = [];
+$("bFiles").onchange = async () => {
+  batch = [];
+  for (const f of [...$("bFiles").files]) batch.push({name: f.name, hash: await sha256(f)});
+  $("bList").textContent = batch.length
+    ? `${batch.length} fichier(s) prêt(s) : ` + batch.map(b => b.name).join(", ")
+    : "Aucun fichier.";
+};
+$("batchBtn").onclick = guard($("bOut"), () => {
+  if (!batch.length) throw new Error("Choisis au moins un fichier.");
+  const t = toTs($("bExp").value), hashes = batch.map(b => b.hash);
+  return () => send($("bOut"), `Émission de ${hashes.length} certificats`, c => c.issueCertificates(hashes, t));
 });
 $("revokeBtn").onclick = guard($("revOut"), () => {
   const h = need("lf"), r = $("revReason").value.trim();
